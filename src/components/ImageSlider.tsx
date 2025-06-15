@@ -16,12 +16,29 @@ const ImageSlider = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Hooks
-  const { handleMouseDown, handleMouseMove, handleMouseUp } = useImageSlider({
+  const {
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    isLoading,
+    error,
+  } = useImageSlider({
     images,
     canvasRef,
     canvasWidth,
     canvasHeight,
   });
+
+  if (error) {
+    return <div>Error loading images: {error.message}</div>;
+  }
+
+  if (isLoading) {
+    return <div>Loading images...</div>;
+  }
 
   return (
     <canvas
@@ -30,6 +47,9 @@ const ImageSlider = ({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       width={canvasWidth}
       height={canvasHeight}
       style={{ cursor: "grab" }}
