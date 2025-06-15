@@ -25,6 +25,7 @@ const ImageSlider = ({
     handleTouchEnd,
     isLoading,
     error,
+    isDragging,
   } = useImageSlider({
     images,
     canvasRef,
@@ -52,7 +53,7 @@ const ImageSlider = ({
       onTouchEnd={handleTouchEnd}
       width={canvasWidth}
       height={canvasHeight}
-      style={{ cursor: "grab" }}
+      style={{ cursor: isDragging ? "grabbing" : "grab" }}
     />
   );
 };

@@ -213,6 +213,7 @@ const useImageSlider = ({
     handleTouchEnd,
     isLoading,
     error,
+    isDragging,
   };
 };
 
