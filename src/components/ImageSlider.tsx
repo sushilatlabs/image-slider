@@ -18,8 +18,6 @@ const ImageSlider = ({
   // Hooks
   const {
     handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
@@ -45,9 +43,6 @@ const ImageSlider = ({
     <canvas
       ref={canvasRef}
       onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

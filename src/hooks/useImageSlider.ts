@@ -34,6 +34,58 @@ const useImageSlider = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Mouse Handlers
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    setIsDragging(true);
+    setStartX(e.clientX);
+  };
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isDragging) return;
+
+      const deltaX = startX - e.clientX;
+      const newOffset = offset + deltaX;
+
+      // Constrain offset to valid range
+      const constrainedOffset = Math.max(
+        0,
+        Math.min(newOffset, TOTAL_WIDTH - canvasWidth)
+      );
+      setOffset(constrainedOffset);
+      setStartX(e.clientX);
+    },
+    [isDragging, startX, offset, TOTAL_WIDTH, canvasWidth]
+  );
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Touch handlers
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDragging) return;
+
+    const deltaX = startX - e.touches[0].clientX;
+    const newOffset = offset + deltaX;
+
+    const constrainedOffset = Math.max(
+      0,
+      Math.min(newOffset, TOTAL_WIDTH - canvasWidth)
+    );
+    setOffset(constrainedOffset);
+    setStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   // Hooks
   const calculateImageDimensions = useCallback(
     (img: HTMLImageElement): ImageDimensions => {
@@ -106,6 +158,30 @@ const useImageSlider = ({
   }, [images]);
 
   useEffect(() => {
+    if (isDragging) {
+      // Mouse events
+      document.addEventListener("mousemove", handleMouseMove, {
+        passive: false,
+      });
+      document.addEventListener("mouseup", handleMouseUp);
+
+      // Prevent text selection and scrolling
+      document.body.style.userSelect = "none";
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      // Clean up
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+
+      // Restore body styles
+      document.body.style.userSelect = "";
+      document.body.style.overflow = "";
+    };
+  }, [isDragging, handleMouseMove, handleMouseUp]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || loadedImages.length === 0) return;
 
@@ -155,59 +231,8 @@ const useImageSlider = ({
     calculateDrawPosition,
   ]);
 
-  // Mouse Handlers
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    setIsDragging(true);
-    setStartX(e.clientX);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDragging) return;
-
-    const deltaX = startX - e.clientX;
-    const newOffset = offset + deltaX;
-
-    // Constrain offset to valid range
-    const constrainedOffset = Math.max(
-      0,
-      Math.min(newOffset, TOTAL_WIDTH - canvasWidth)
-    );
-    setOffset(constrainedOffset);
-    setStartX(e.clientX);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  // Touch handlers
-  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    setIsDragging(true);
-    setStartX(e.touches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDragging) return;
-
-    const deltaX = startX - e.touches[0].clientX;
-    const newOffset = offset + deltaX;
-
-    const constrainedOffset = Math.max(
-      0,
-      Math.min(newOffset, TOTAL_WIDTH - canvasWidth)
-    );
-    setOffset(constrainedOffset);
-    setStartX(e.touches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-  };
-
   return {
     handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
